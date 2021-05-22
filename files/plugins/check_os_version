@@ -1,0 +1,70 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Nagios plugin to check if debian version is current.
+Copyright (c) 2012 Peter Kropf. All rights reserved.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+On debian based systems, the existance of /var/run/reboot-required
+(and /var/run/reboot-required.pkgs) lets the user know that the system
+needs to be rebooted. The .pkgs file tells why.
+This plugin looks for /var/run/reboot-required and returns a warning
+if it's found. Otherwise it returns ok.
+Example:
+    ./check_os_version
+"""
+
+
+import sys
+import os
+from optparse import OptionParser
+import requests
+
+item_name = 'OS_version'
+
+class nagios:
+    ok       = (0, 'OK')
+    warning  = (1, 'WARNING')
+    critical = (2, 'CRITICAL')
+    unknown  = (3, 'UNKNOWN')
+
+def exit(status, item_name, check_output):
+    print(str(status[0]) + " " + item_name + " - " + check_output)
+    sys.exit(status[0])
+
+os_version_path = '/etc/debian_version'
+
+r = requests.get('https://packages.luke.ch/debian/current')
+if r.status_code == requests.codes.ok:
+    current_stable = r.text.rstrip()
+else:
+    current_stable = 10.0 # use 10.0 as the current stable version is unknown
+
+current_stable = float(current_stable)
+
+if os.path.exists(os_version_path):
+    with open(os_version_path, 'r') as myfile:
+        os_version_string = myfile.read().replace('\n', '')
+    os_version_number = float(os_version_string)
+    if ( os_version_number < current_stable ):
+        exit(nagios.warning, item_name, 'os version not current: ' + str(os_version_number))
+    else:
+        exit(nagios.ok, item_name, 'os version current: ' + str(os_version_number))
+
+else:
+    exit(nagios.unknown, 'unknown os version')
+
