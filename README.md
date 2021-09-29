@@ -62,12 +62,10 @@ None.
     check_mk_agent_monitoring_host_wato_username: ansible
     check_mk_agent_monitoring_host_wato_secret: 7JTuBt6nETYHG1GS
     check_mk_agent_local_checks:
-      filecount:
-        src: files/check_mk_local_checks/filecount
+      check_reboot_required:
         cache_time: 600
-      filestat:
-        src: files/check_mk_local_checks/filestat
-
+      check_os_version:
+        cache_time: 600
   roles:
      - elnappo.check_mk_agent
 ```

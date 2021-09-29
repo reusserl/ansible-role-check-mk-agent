@@ -19,7 +19,7 @@
     group: root
     state: directory
 
-- name: Copy plugins
+- name: Copy plugins to /usr/lib/check_mk_agent/plugins
   copy:
     src: plugins/{{ item }}
     dest: /usr/lib/check_mk_agent/plugins/{{ item }}
@@ -59,7 +59,7 @@
 
 - name: Copy local checks
   copy:
-    src: "{{ item.value.src }}"
+    src: "local/{{ item.key }}"
     dest: /usr/lib/check_mk_agent/local/{{ item.value.cache_time | default(omit) }}/{{ item.key }}
     owner: root
     group: root
