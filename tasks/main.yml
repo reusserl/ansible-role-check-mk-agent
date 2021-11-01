@@ -3,7 +3,7 @@
 - name: Install check_mk_agent
   package:
     name: "{{ check_mk_agent_package_name }}"
-    state: present
+    state: latest
   when: not check_mk_agent_manual_install
 
 - name: Install plugin requirements
@@ -68,12 +68,18 @@
 
 - name: systemd socket activation
   block:
+    - name: Check if /etc/systemd/system/check_mk.socket exists
+      stat:
+        path: /etc/systemd/system/check_mk.socket
+      register: check_mk_socket
+
     - name: Start and enable check_mk.socket (use systemd-socket)
       systemd:
         name: check_mk.socket
         daemon_reload: true
         state: started
         enabled: true
+      when: check_mk_socket.stat.exists
 
     - name: Allow check_mk.socket (ufw)
       ufw:
