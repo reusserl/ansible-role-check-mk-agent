@@ -81,6 +81,14 @@
         enabled: true
       when: check_mk_socket.stat.exists
 
+    - name: Start and enable check_mk-async.service (use systemd-socket)
+      systemd:
+        name: check_mk-async.service
+        daemon_reload: true
+        state: started
+        enabled: true
+      when: check_mk_socket.stat.exists
+
     - name: Allow check_mk.socket (ufw)
       ufw:
         rule: allow
