@@ -69,7 +69,7 @@
 - name: Copy local checks to plugins directory too
   copy:
     src: "local/{{ item.key }}"
-    dest: /usr/lib/check_mk_agent/plugins/{{ item }}
+    dest: "/usr/lib/check_mk_agent/plugins/{{ item.key }}"
     owner: root
     group: root
     mode: 0755
