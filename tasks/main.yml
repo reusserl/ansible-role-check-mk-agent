@@ -6,6 +6,14 @@
     state: latest
   when: not check_mk_agent_manual_install
 
+- name: Modify systemd unit file for check_mk.socket
+  template:
+    src: check_mk.socket.j2
+    dest: /etc/systemd/system/check_mk.socket
+    mode: 0640
+  register: check_mk_socket_config
+  when: check_mk_agent_systemd_MaxConnectionsPerSource != 3
+
 - name: Install plugin requirements
   package:
     name: "{{ item }}"
@@ -94,9 +102,9 @@
       systemd:
         name: check_mk-async.service
         daemon_reload: true
-        state: started
+        state: restarted
         enabled: true
-      when: check_mk_socket.stat.exists
+      when: check_mk_socket.stat.exists or check_mk_socket_config is changed
 
     - name: Allow check_mk.socket (ufw)
       ufw:

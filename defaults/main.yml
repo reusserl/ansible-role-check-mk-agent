@@ -15,3 +15,4 @@ check_mk_agent_setup_firewall: true
 check_mk_agent_manual_install: false
 check_mk_agent_package_name: "check-mk-agent"
 check_mk_agent_additional_packages: []
+check_mk_agent_systemd_MaxConnectionsPerSource: 3
